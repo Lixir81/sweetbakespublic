@@ -28,7 +28,7 @@
         <div class="stat-label">Total Orders</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value" id="totalSpent">$0</div>
+        <div class="stat-value" id="totalSpent">0</div>
         <div class="stat-label">Total Spent</div>
       </div>
       <div class="stat-card">
@@ -95,7 +95,7 @@
                   <p>Quantity: ${order.quantity}</p>
                   <p class="order-date">Ordered: ${new Date(order.created_at).toLocaleDateString()}</p>
                 </div>
-                <div class="order-price">$${order.total_price.toFixed(2)}</div>
+                <div class="order-price">Php${order.total_price.toFixed(2)}</div>
               </div>
             `).join('')}
           </div>
@@ -114,7 +114,7 @@
       const pendingOrders = orders.filter(o => o.status === 'pending').length;
 
       document.getElementById('totalOrders').textContent = totalOrders;
-      document.getElementById('totalSpent').textContent = '$' + totalSpent.toFixed(2);
+      document.getElementById('totalSpent').textContent = 'Php' + totalSpent.toFixed(2);
       document.getElementById('pendingOrders').textContent = pendingOrders;
     }
 
