@@ -484,6 +484,10 @@ app.get('/api/orders', checkAuth, (req, res) => {
 });
 
 app.post('/api/orders', checkAuth, (req, res) => {
+      if (req.session.user.role === 'admin') {
+    return res.status(403).json({ error: 'Admins cannot place orders' });
+  }
+
   const { product_id, quantity } = req.body;
 
   if (!product_id || !quantity || quantity < 1) {
