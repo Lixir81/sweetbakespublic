@@ -532,6 +532,7 @@
       try {
         const res = await fetch('/api/orders');
         const orders = await res.json();
+         orders.sort((a, b) => a.id - b.id);
         const tbody = document.getElementById('ordersTable');
 
         tbody.innerHTML = orders.map(o => `
