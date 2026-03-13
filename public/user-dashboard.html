@@ -28,7 +28,7 @@
         <div class="stat-label">Total Orders</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value" id="totalSpent">0</div>
+        <div class="stat-value" id="totalSpent">₱0</div>
         <div class="stat-label">Total Spent</div>
       </div>
       <div class="stat-card">
@@ -84,10 +84,10 @@
 
         container.innerHTML = `
           <div class="orders-grid">
-            ${orders.map(order => `
+            ${orders.map((order, index) => `
               <div class="order-card">
                 <div class="order-header">
-                  <div class="order-id">Order #${order.id}</div>
+                  <div class="order-id">Order #${index + 1}</div>
                   <span class="order-status status-${order.status.toLowerCase()}">${order.status}</span>
                 </div>
                 <div class="order-details">
@@ -95,7 +95,7 @@
                   <p>Quantity: ${order.quantity}</p>
                   <p class="order-date">Ordered: ${new Date(order.created_at).toLocaleDateString()}</p>
                 </div>
-                <div class="order-price">Php${order.total_price.toFixed(2)}</div>
+                <div class="order-price">₱${order.total_price.toFixed(2)}</div>
               </div>
             `).join('')}
           </div>
@@ -114,7 +114,7 @@
       const pendingOrders = orders.filter(o => o.status === 'pending').length;
 
       document.getElementById('totalOrders').textContent = totalOrders;
-      document.getElementById('totalSpent').textContent = 'Php' + totalSpent.toFixed(2);
+      document.getElementById('totalSpent').textContent = '₱' + totalSpent.toFixed(2);
       document.getElementById('pendingOrders').textContent = pendingOrders;
     }
 
