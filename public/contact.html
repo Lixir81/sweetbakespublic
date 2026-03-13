@@ -6,12 +6,12 @@
   <title>Contact - Sweet Bakes</title>
   <link rel="stylesheet" href="styles/contact.css">
   <style>
-
+    /* Hide both by default - they take up no space */
     #authButtons {
-      visibility: hidden;
+      display: none;
     }
     #userMenu {
-      visibility: hidden;
+      display: none;
     }
   </style>
 </head>
@@ -39,7 +39,7 @@
   </nav>
 
   <div class="container">
-
+    <!-- Contact Section -->
     <section class="contact-section">
       <h1 class="page-title">Contact Us</h1>
       <p class="page-subtitle">Get in touch with Sweet Bakes by Dani</p>
@@ -95,14 +95,11 @@
         const res = await fetch('/api/user');
         if (res.ok) {
           currentUser = await res.json();
-          updateNavigation();
-        } else {
-          updateNavigation();
         }
       } catch (error) {
         console.error('Error loading user:', error);
-        updateNavigation();
       }
+      updateNavigation();
     }
 
     function updateNavigation() {
@@ -110,12 +107,12 @@
       const userMenu = document.getElementById('userMenu');
       
       if (currentUser) {
-        authButtons.style.visibility = 'hidden';
-        userMenu.style.visibility = 'visible';
+        authButtons.style.display = 'none';
+        userMenu.style.display = 'block';
         document.getElementById('username').innerHTML = currentUser.username + ' <span style="font-size: 0.8rem; margin-left: 0.3rem;">▼</span>';
       } else {
-        authButtons.style.visibility = 'visible';
-        userMenu.style.visibility = 'hidden';
+        authButtons.style.display = 'flex';
+        userMenu.style.display = 'none';
       }
     }
 
@@ -128,7 +125,7 @@
       }
     }
 
-
+    // Initialize AFTER DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
       loadUser();
       
@@ -159,6 +156,7 @@
   </script>
 </body>
 </html>
+
 
 
 
