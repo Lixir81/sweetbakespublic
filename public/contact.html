@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact - Sweet Bakes</title>
   <link rel="stylesheet" href="styles/contact.css">
+  <style>
+
+    #authButtons {
+      visibility: hidden;
+    }
+    #userMenu {
+      visibility: hidden;
+    }
+  </style>
 </head>
 <body>
   <nav>
@@ -18,7 +27,7 @@
       <a href="/login" class="btn">Login</a>
       <a href="/register" class="btn btn-primary">Register</a>
     </div>
-    <div id="userMenu" style="display: none;">
+    <div id="userMenu">
       <div class="user-menu" id="userMenuBtn">
         <a id="username">Profile <span style="font-size: 0.8rem; margin-left: 0.3rem;">▼</span></a>
         <div class="dropdown" id="dropdownMenu">
@@ -30,7 +39,7 @@
   </nav>
 
   <div class="container">
-    <!-- Contact Section -->
+
     <section class="contact-section">
       <h1 class="page-title">Contact Us</h1>
       <p class="page-subtitle">Get in touch with Sweet Bakes by Dani</p>
@@ -87,9 +96,12 @@
         if (res.ok) {
           currentUser = await res.json();
           updateNavigation();
+        } else {
+          updateNavigation();
         }
       } catch (error) {
         console.error('Error loading user:', error);
+        updateNavigation();
       }
     }
 
@@ -98,12 +110,12 @@
       const userMenu = document.getElementById('userMenu');
       
       if (currentUser) {
-        authButtons.style.display = 'none';
-        userMenu.style.display = 'block';
+        authButtons.style.visibility = 'hidden';
+        userMenu.style.visibility = 'visible';
         document.getElementById('username').innerHTML = currentUser.username + ' <span style="font-size: 0.8rem; margin-left: 0.3rem;">▼</span>';
       } else {
-        authButtons.style.display = 'flex';
-        userMenu.style.display = 'none';
+        authButtons.style.visibility = 'visible';
+        userMenu.style.visibility = 'hidden';
       }
     }
 
@@ -116,44 +128,38 @@
       }
     }
 
-    // Initialize - wait for DOM to be ready
-    window.addEventListener('DOMContentLoaded', function() {
+
+    document.addEventListener('DOMContentLoaded', function() {
       loadUser();
+      
+      if (document.getElementById('userMenuBtn')) {
+        document.getElementById('userMenuBtn').addEventListener('click', function(e) {
+          const dropdown = document.getElementById('dropdownMenu');
+          dropdown.classList.toggle('active');
+          e.stopPropagation();
+        });
+
+        document.addEventListener('click', function(e) {
+          const userMenu = document.getElementById('userMenuBtn');
+          const dropdown = document.getElementById('dropdownMenu');
+          if (userMenu && !userMenu.contains(e.target)) {
+            dropdown.classList.remove('active');
+          }
+        });
+
+        document.getElementById('dropdownMenu').addEventListener('click', function(e) {
+          if (e.target.tagName === 'A') {
+            setTimeout(() => {
+              this.classList.remove('active');
+            }, 100);
+          }
+        });
+      }
     });
-
-    // Fallback if DOMContentLoaded already fired
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', loadUser);
-    } else {
-      loadUser();
-    }
-
-    if (document.getElementById('userMenuBtn')) {
-      document.getElementById('userMenuBtn').addEventListener('click', function(e) {
-        const dropdown = document.getElementById('dropdownMenu');
-        dropdown.classList.toggle('active');
-        e.stopPropagation();
-      });
-
-      document.addEventListener('click', function(e) {
-        const userMenu = document.getElementById('userMenuBtn');
-        const dropdown = document.getElementById('dropdownMenu');
-        if (userMenu && !userMenu.contains(e.target)) {
-          dropdown.classList.remove('active');
-        }
-      });
-
-      document.getElementById('dropdownMenu').addEventListener('click', function(e) {
-        if (e.target.tagName === 'A') {
-          setTimeout(() => {
-            this.classList.remove('active');
-          }, 100);
-        }
-      });
-    }
   </script>
 </body>
 </html>
+
 
 
  
