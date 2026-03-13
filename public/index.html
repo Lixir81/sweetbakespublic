@@ -120,7 +120,7 @@
         return;
       }
       
-      const quantity = prompt('How many would you like?', '1');
+      const quantity = prompt('How many would you like? (Cakes are to be claimed on shop location please view the shop location)', '1');
       if (quantity && quantity > 0) {
         fetch('/api/orders', {
           method: 'POST',
