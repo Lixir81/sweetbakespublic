@@ -673,6 +673,8 @@ app.put('/api/custom-cake-request/:id', checkAuth, checkAdmin, (req, res) => {
   if (!['pending', 'approved', 'rejected', 'completed'].includes(status)) {
     return res.status(400).json({ error: 'Invalid status' });
   }
+  
+  
 
   db.run(
     'UPDATE custom_cake_requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
@@ -685,6 +687,38 @@ app.put('/api/custom-cake-request/:id', checkAuth, checkAdmin, (req, res) => {
   );
 });
 
+  app.delete('/api/custom-cake-request/:id', checkAuth, checkAdmin, (req, res) => {
+  try {
+    // First, check if the request exists
+    const request = db.prepare('SELECT * FROM custom_cake_requests WHERE id = ?').get(req.params.id);
+    
+    if (!request) {
+      return res.status(404).json({ error: 'Custom cake request not found' });
+    }
+ 
+    // Delete the reference image file if it exists
+    if (request.reference_image) {
+      const imagePath = path.join(__dirname, 'public', request.reference_image);
+      try {
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
+      } catch (err) {
+        console.error('Error deleting image:', err);
+        // Continue with deletion even if image delete fails
+      }
+    }
+ 
+    // Delete the custom cake request from database
+    db.prepare('DELETE FROM custom_cake_requests WHERE id = ?').run(req.params.id);
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete custom cake request error:', error);
+    res.status(500).json({ error: 'Failed to delete custom cake request' });
+  }
+});
+ 
 app.listen(PORT, () => {
   console.log(`\n🍰 Sweet Bakes Server running on http://localhost:${PORT}\n`);
   console.log('Demo Credentials:');
