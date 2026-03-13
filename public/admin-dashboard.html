@@ -691,6 +691,7 @@
             <td>
               <div class="action-buttons">
                 <button class="btn btn-small" onclick="viewCustomRequest(${JSON.stringify(r).replace(/"/g, '&quot;')})">View Details</button>
+                <button class="btn btn-small btn-danger" onclick="deleteCustomRequest(${r.id})">Delete</button>
               </div>
             </td>
           </tr>
@@ -727,6 +728,23 @@
 
     function closeCustomRequestModal() {
       document.getElementById('customRequestModal').classList.remove('show');
+    }
+
+    async function deleteCustomRequest(id) {
+      if (confirm('Are you sure you want to delete this custom cake request?')) {
+        try {
+          const res = await fetch(`/api/custom-cake-request/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            showCustomRequestSuccess('Custom cake request deleted successfully!');
+            loadCustomRequests();
+          } else {
+            showCustomRequestError('Failed to delete custom cake request');
+          }
+        } catch (error) {
+          showCustomRequestError('Error deleting custom cake request');
+          console.error('Error:', error);
+        }
+      }
     }
 
     document.getElementById('customRequestStatusForm').addEventListener('submit', async (e) => {
@@ -845,7 +863,6 @@
           showSettingsSuccess('Password changed successfully! Please log in again with your new password.');
           document.getElementById('passwordForm').reset();
           
-          // Log out after 2 seconds
           setTimeout(() => {
             logout();
           }, 2000);
