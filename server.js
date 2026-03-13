@@ -525,38 +525,75 @@ app.put('/api/orders/:id', checkAuth, checkAdmin, (req, res) => {
 });
 
 app.delete('/api/orders/:id', checkAuth, checkAdmin, (req, res) => {
-  db.run('DELETE FROM orders WHERE id = ?', [req.params.id], function(err) {
-    if (err) return res.status(500).json({ error: 'Failed to delete order' });
-    if (this.changes === 0) return res.status(404).json({ error: 'Order not found' });
-    res.json({ success: true });
-  });
-});
+  const orderId = req.params.id;
+  console.log('Deleting order:', orderId);
+  
 
+  db.get('SELECT * FROM orders WHERE id = ?', [orderId], function(err, order) {
+    if (err) {
+      console.error('Error getting order:', err);
+      return res.status(500).json({ error: 'Failed to get order' });
+    }
+    
+    if (!order) {
+      console.log('Order not found');
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    
+    console.log('Order found:', JSON.stringify(order));
+    const productId = order.product_id;
+    const quantity = order.quantity;
+    
+ 
+    db.get('SELECT * FROM products WHERE id = ?', [productId], function(err, product) {
+      if (err) {
+        console.error('Error getting product:', err);
+        return res.status(500).json({ error: 'Failed to get product' });
+      }
+      
+      if (!product) {
+        console.log('Product not found');
+        return res.status(404).json({ error: 'Product not found' });
+      }
+      
+      console.log('Product found:', JSON.stringify(product));
+      const oldStock = parseInt(product.stock);
+      const newStock = oldStock + parseInt(quantity);
+      
+      console.log(`Stock calculation: ${oldStock} + ${quantity} = ${newStock}`);
+      
 
-app.get('/api/export/products-xml', (req, res) => {
-  db.all('SELECT * FROM products', (err, products) => {
-    if (err) return res.status(500).json({ error: 'Server error' });
-
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<?xml-stylesheet type="text/xsl" href="products.xslt"?>\n';
-    xml += '<products>\n';
-
-    (products || []).forEach(p => {
-      xml += `  <product>\n`;
-      xml += `    <id>${p.id}</id>\n`;
-      xml += `    <name>${p.name}</name>\n`;
-      xml += `    <description>${p.description || ''}</description>\n`;
-      xml += `    <price>${p.price}</price>\n`;
-      xml += `    <stock>${p.stock}</stock>\n`;
-      xml += `  </product>\n`;
+      db.run('UPDATE products SET stock = ? WHERE id = ?', [newStock, productId], function(err) {
+        if (err) {
+          console.error('Error updating stock:', err);
+          return res.status(500).json({ error: 'Failed to update stock' });
+        }
+        
+        console.log('Stock updated');
+        
+  
+        db.run('DELETE FROM orders WHERE id = ?', [orderId], function(err) {
+          if (err) {
+            console.error('Error deleting order:', err);
+            return res.status(500).json({ error: 'Failed to delete order' });
+          }
+          
+          console.log('Order deleted. New stock:', newStock);
+          
+          res.json({ 
+            success: true,
+            message: `Order deleted. ${quantity} units of "${product.name}" returned to stock.`,
+            newStock: newStock,
+            productId: productId,
+            productName: product.name,
+            quantity: quantity
+          });
+        });
+      });
     });
-
-    xml += '</products>';
-
-    res.set('Content-Type', 'application/xml');
-    res.send(xml);
   });
 });
+
 
 app.get('/api/export/orders-xml', checkAuth, (req, res) => {
   db.all(
