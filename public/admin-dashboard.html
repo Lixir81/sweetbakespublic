@@ -589,22 +589,28 @@
       }
     });
 
-    async function deleteOrder(id) {
-      if (confirm('Are you sure you want to delete this order?')) {
-        try {
-          const res = await fetch(`/api/orders/${id}`, { method: 'DELETE' });
-          if (res.ok) {
-            showOrderSuccess('Order deleted successfully!');
-            loadOrders();
-          } else {
-            showOrderError('Failed to delete order');
-          }
-        } catch (error) {
-          showOrderError('Error deleting order');
-          console.error('Error:', error);
-        }
+ async function deleteOrder(id) {
+  if (confirm('Are you sure you want to delete this order?')) {
+    try {
+      const res = await fetch(`/api/orders/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+ 
+      if (res.ok) {
+        showOrderSuccess(`Order deleted! ${data.quantity} units of "${data.productName}" returned to stock.`);
+        
+        // Reload all tables
+        loadOrders();
+        loadProducts();
+        loadStats();
+      } else {
+        showOrderError(data.error || 'Failed to delete order');
       }
+    } catch (error) {
+      showOrderError('Error deleting order');
+      console.error('Error:', error);
     }
+  }
+}
 
     // ============ STATS ============
 
