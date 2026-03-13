@@ -67,7 +67,7 @@
           <div class="form-row">
             <div class="form-group">
               <label for="customerPhone">Phone Number *</label>
-              <input type="tel" id="customerPhone" required placeholder="09XXXXXXXXX">
+              <input type="tel" id="customerPhone" required placeholder="09XXXXXXXXX" pattern="^09[0-9]{9}$" title="Phone number must be 11 digits starting with 09 (e.g., 09123456789)">
             </div>
 
             <div class="form-group">
@@ -130,7 +130,7 @@
             <textarea id="additionalNotes" placeholder="Any allergies, special requests, or additional information..." style="min-height: 80px;"></textarea>
           </div>
 
-          <button type="submit" class="btn btn-submit">Submit Custom Cake Request</button>
+          <button type="submit" class="btn btn-submit" id="submitBtn">Submit Custom Cake Request</button>
         </form>
       </div>
     </section>
@@ -143,6 +143,7 @@
 
   <script>
     let currentUser = null;
+    let isSubmitting = false;
 
     // Load user if logged in
     async function loadUser() {
@@ -155,6 +156,7 @@
           document.getElementById('loginPrompt').style.display = 'none';
           // Pre-fill form with user info
           document.getElementById('customerEmail').value = currentUser.email;
+          setMinDate();
         } else {
           document.getElementById('customCakeForm').style.display = 'none';
           document.getElementById('loginPrompt').style.display = 'block';
@@ -164,6 +166,12 @@
         document.getElementById('customCakeForm').style.display = 'none';
         document.getElementById('loginPrompt').style.display = 'block';
       }
+    }
+
+    // Set minimum date to today
+    function setMinDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('eventDate').min = today;
     }
 
     function updateNavigation() {
@@ -206,11 +214,45 @@
     document.getElementById('customCakeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      // Prevent double submission
+      if (isSubmitting) {
+        return;
+      }
+
       if (!currentUser) {
         alert('Please login to submit a custom cake request');
         window.location.href = '/login';
         return;
       }
+
+      // Validate phone number
+      const phone = document.getElementById('customerPhone').value;
+      if (!/^09[0-9]{9}$/.test(phone)) {
+        document.getElementById('errorMsg').textContent = '× Phone number must be 11 digits starting with 09 (e.g., 09123456789)';
+        document.getElementById('errorMsg').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('errorMsg').style.display = 'none';
+        }, 5000);
+        return;
+      }
+
+      // Validate event date is not in the past
+      const eventDate = new Date(document.getElementById('eventDate').value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (eventDate < today) {
+        document.getElementById('errorMsg').textContent = '× Event date cannot be in the past. Please select a future date.';
+        document.getElementById('errorMsg').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('errorMsg').style.display = 'none';
+        }, 5000);
+        return;
+      }
+
+      isSubmitting = true;
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
 
       const formData = new FormData();
       formData.append('customer_name', document.getElementById('customerName').value);
@@ -241,6 +283,7 @@
           document.getElementById('successMsg').style.display = 'block';
           document.getElementById('customCakeForm').reset();
           document.getElementById('imagePreview').style.display = 'none';
+          setMinDate();
           
           setTimeout(() => {
             document.getElementById('successMsg').style.display = 'none';
@@ -257,11 +300,17 @@
         document.getElementById('errorMsg').textContent = '× Error submitting request. Please try again.';
         document.getElementById('errorMsg').style.display = 'block';
         console.error('Error:', error);
+      } finally {
+        isSubmitting = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Custom Cake Request';
       }
     });
 
     // Initialize
-    loadUser();
+    document.addEventListener('DOMContentLoaded', function() {
+      loadUser();
+    });
 
     if (document.getElementById('userMenuBtn')) {
       document.getElementById('userMenuBtn').addEventListener('click', function(e) {
