@@ -8,8 +8,9 @@
 </head>
 <body>
   <header>
-    <div class="logo">🍰 Admin Panel</div>
+    <div class="logo"><a href="/" style="color: inherit; text-decoration: none;">🍰 Admin Panel</a></div>
     <div class="header-actions">
+      <a href="/" class="btn" style="text-decoration: none;">🏠 Home</a>
       <div class="user-info">
         Admin: <span id="username"></span>
       </div>
@@ -246,7 +247,7 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="productPrice">Price (Php)</label>
+            <label for="productPrice">Price (₱)</label>
             <input type="number" id="productPrice" step="0.01" required>
           </div>
 
@@ -767,32 +768,6 @@
       msg.classList.add('show');
       setTimeout(() => msg.classList.remove('show'), 3000);
     }
-
-    document.getElementById('customRequestStatusForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const status = document.getElementById('customRequestStatus').value;
-      const requestId = window.currentCustomRequestId;
-
-      try {
-        const res = await fetch(`/api/custom-cake-request/${requestId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status })
-        });
-
-        if (res.ok) {
-          showCustomRequestSuccess('Status updated successfully');
-          closeCustomRequestModal();
-          loadCustomRequests();
-        } else {
-          showCustomRequestError('Failed to update status');
-        }
-      } catch (error) {
-        showCustomRequestError('Error updating status');
-        console.error('Error:', error);
-      }
-    });
 
     // Initialize
     loadUser();
